@@ -1,0 +1,60 @@
+
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/userLayout}">
+<!--
+    날짜 : 2024/03/25
+    이름 : 윤혜지
+    내용 : 아이디 찾기 조회 결과 구현하기
+
+    - http://localhost:8080/sboard/user/findIdResult
+    - 인증된 이메일과 사용자이름으로 사용자 조회
+    - 이름, 아이디, 이메일, 가입일 사용자 정보 출력하기
+-->
+
+<div class="container" layout:fragment="content">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                <div class="card-header"><h3 class="text-center font-weight-light my-4">아이디 찾기 결과</h3></div>
+                <div class="card-body">
+
+                    <table class="table">
+                        <tbody>
+                        <tr>
+                            <td>이름</td>
+                            <td>[[${userDTO.name}]]</td>
+                        </tr>
+                        <tr>
+                            <td>아이디</td>
+                            <td>[[${userDTO.uid}]]</td>
+                        </tr>
+                        <tr>
+                            <td>이메일</td>
+                            <td>[[${userDTO.email}]]</td>
+                        </tr>
+                        <tr>
+                            <td>가입일</td>
+                            <td>[[${#temporals.format(userDTO.regDate, 'yyyy-MM-dd')}]]</td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <p class="small">
+
+                    </p>
+
+
+                </div>
+                <div class="card-footer text-center py-3">
+                    <div>
+                        <a th:href="@{/user/findPassword}" class="btn btn-secondary">비밀번호 찾기</a>
+                        <a th:href="@{/user/login}" class="btn btn-primary">로그인</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- container end -->
+</html>

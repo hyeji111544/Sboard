@@ -1,0 +1,147 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/userLayout}">
+
+<!--
+    날짜 : 2024/03/25
+    이름 : 윤혜지
+    내용 : 아이디 찾기 기능 구현하기
+
+    - http://localhost:8080/sboard/user/findId
+    - 회원가입한 이메일로 인증을 받고 이름과 이메일로 사용자 조회
+    - 조회된 사용자는 아이디 찾기 결과 페이지에 출력
+-->
+<div class="container" layout:fragment="content">
+
+    <script>
+        window.onload = function (){
+            /*id="btnCheckEmail"*/
+            const btnCheckEmail = document.getElementById('btnCheckEmail');
+            const resultName = document.getElementById('resultName');
+            const resultEmail = document.getElementById('resultEmail');
+
+            btnCheckEmail.onclick = async function (e){
+                e.preventDefault();
+                const spinner   = this.getElementsByClassName('spinner')[0];
+                const jsonData = {
+                    "name" : formFindId.name.value,
+                    "email" : formFindId.email.value
+                };
+
+                console.log(jsonData);
+
+                const email = jsonData.email;
+                spinner.classList.remove('d-none');
+
+
+                try{
+
+                    const data = await fetchPost(`/sboard/user/findId`, jsonData);
+                    console.log("!!!"+data);
+
+                    if (data !== null) {
+                        showResultInvalid(resultName, '');
+                        console.log("메일발송 로직");
+                        const emailData = await fetchGet(`/sboard/user/${email}`);
+                        showResultValid(resultEmail, '인증코드가 발송 되었습니다.');
+                    } else {
+                        console.log("이너텍스트 처리");
+                        showResultInvalid(resultName, '해당하는 유저를 찾을 수 없습니다.');
+                    }
+                }catch (error){
+                    console.error("오류... :", error);
+                    showResultInvalid(resultName, '해당하는 유저를 찾을 수 없습니다.');
+                }finally {
+                    spinner.classList.add('d-none');
+                }
+            }
+
+            // 이메일 인증코드 확인
+            const inputEmailCodes = document.querySelector('.inputEmailCode')
+            const btnCheckEmailCode = document.getElementById('btnCheckEmailCode');
+
+            btnCheckEmailCode.onclick = async function (){
+
+                const value = inputEmailCodes.value;
+                console.log("checkEmailCodes"+value);
+
+                const data = await fetchGet(`/sboard/email/${value}`);
+
+                if(!data.result){
+                    alertModal('코드번호를 다시 확인해 주세요.');
+
+                }else{
+                   var form = document.forms["formFindId"];
+
+                   form.submit();
+                }
+            }
+        }
+    </script>
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                <div class="card-header"><h3 class="text-center font-weight-light my-4">아이디 찾기</h3></div>
+                <div class="card-body">
+                    <form name="formFindId" action="/sboard/user/findIdResult" method="post">
+                        <div class="row mb-3">
+                            <div class="col-md-7">
+                                <div class="form-floating mb-3 mb-md-0">
+                                    <input class="form-control inputName" type="text" id="inputName" name="name" placeholder="" />
+                                    <label for="inputName">이름 입력</label>
+                                </div>
+                                <div id="resultName" class="d-block"></div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-7">
+                                <div class="form-floating mb-3 mb-md-0">
+                                    <input class="form-control inputEmail" type="text" id="inputEmail" name="email" placeholder="이메일 입력" />
+                                    <label for="inputEmail">이메일 입력</label>
+                                </div>
+                                <div id="resultEmail" class="d-block"></div>
+                            </div>
+                            <div class="col-md-5">
+                                <button type="button" class="btn btn-outline-secondary w-100" id="btnCheckEmail" data-type="email">
+                                    <span class="spinner spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+                                    <span class="" role="status">이메일 인증</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-7">
+                                <div class="form-floating mb-3">
+                                    <input class="form-control inputEmailCode" type="text" id="inputEmailCode" name="code" placeholder="인증번호 입력" />
+                                    <label for="inputEmailCode">인증번호 입력</label>
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <button type="button" class="btn btn-outline-secondary w-100" id="btnCheckEmailCode">
+                                    <span class="spinner spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+                                    <span class="" role="status">인증확인</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="resultEmailCode" class="d-block"></div>
+
+                        <p class="small">
+                            회원가입시 이메일 주소와 입력한 이메일 주소가 같아야, 인증번호를 받을 수 있습니다.<br>
+                            인증번호를 입력 후 확인 버튼을 누르세요.
+                        </p>
+
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <div>
+                        <a th:href="@{/user/login}" class="btn btn-secondary">취소</a>
+                        <a th:href="@{/user/findIdResult}" class="btn btn-primary" id="btnNext">다음</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- container end -->
+</html>

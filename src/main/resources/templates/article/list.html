@@ -1,0 +1,96 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/defaultLayout.html}">
+
+<div class="container-fluid px-4" layout:fragment="content">
+
+
+    <h3 class="mt-4 mb-4">게시판 목록</h3>
+
+
+    <!-- 내용 시작 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+                <span th:if="${pageResponseDTO.cate == 'notice'}">공지사항 글목록</span>
+                <span th:if="${pageResponseDTO.cate == 'free'}">자유게시판 글목록</span>
+                <span th:if="${pageResponseDTO.cate == 'faq'}">자주묻는질문 글목록</span>
+                <span th:if="${pageResponseDTO.cate == 'qna'}">묻고답하기 글목록</span>
+        </div>
+
+        <div class="card-body">
+            <!-- Navbar Search-->
+            <form th:action="@{/article/list}" class="float-end d-none  d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0 ">
+                <input type="hidden" name="cate" th:value="${pageResponseDTO.cate}">
+                <div class="input-group">
+                    <select name="type" class="form-select" aria-label="Default select example">
+                        <option value="title">제목</option>
+                        <option value="content">내용</option>
+                        <option value="title_content">제목+내용</option>
+                        <option value="writer">글쓴이</option>
+                    </select>
+                    <input class="form-control" type="text" name="keyword" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
+                    <button class="btn btn-secondary" id="btnNavbarSearch" type="submit"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
+
+            <table class="table table-hover mt-5">
+                <thead class="table-dark">
+                <tr>
+                    <th>번호</th>
+                    <th>제목</th>
+                    <th>작성자</th>
+                    <th>조회수</th>
+                    <th>등록일</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr th:if="${pageResponseDTO.dtoList.isEmpty()}">
+                    <td colspan="5">검색 결과가 없습니다.</td>
+                </tr>
+
+                <tr th:each="articles, index:${pageResponseDTO.dtoList}">
+                    <td>[[${pageResponseDTO.startNo - index.index}]]</td>
+                    <td>
+                        <a th:unless="${pageResponseDTO.type == null and pageResponseDTO.keyword == null}" th:href="@{/article/view(no=${articles.no}, cate=${articles.cate}, pg=${pageResponseDTO.pg}, type=${pageResponseDTO.type}, keyword=${pageResponseDTO.keyword})}" class="text-dark">[[${articles.title}]]</a>
+                        <a th:unless="${pageResponseDTO.type != null and pageResponseDTO.keyword != null}" th:href="@{/article/view(no=${articles.no}, cate=${articles.cate}, pg=${pageResponseDTO.pg})}" class="text-dark">[[${articles.title}]]</a>
+                    </td>
+                    <td>[[${articles.nick}]]</td>
+                    <td>[[${articles.hit}]]</td>
+                    <td th:text="${#strings.substring(articles.rdate, 0, 10)}"></td>
+                </tr>
+
+
+                </tbody>
+            </table>
+
+            <nav aria-label="Page navigation example" th:if="${not pageResponseDTO.dtoList.isEmpty()}">
+                <ul class="pagination justify-content-center">
+
+                    <li th:if="${pageResponseDTO.prev}" class="page-item">
+                        <a th:if="${pageResponseDTO.keyword == null}" class="page-link" th:href="@{/article/list(cate=${pageResponseDTO.cate}, pg=${pageResponseDTO.start - 1})}">&laquo;</a>
+                        <a th:if="${pageResponseDTO.keyword != null}" class="page-link" th:href="@{/article/list(cate=${pageResponseDTO.cate}, pg=${pageResponseDTO.start - 1}, type=${pageResponseDTO.type}, keyword=${pageResponseDTO.keyword})}">&#60;</a>
+                    </li>
+                    <li th:each="num:${#numbers.sequence(pageResponseDTO.start, pageResponseDTO.end)}" class="page-item">
+                        <a th:if="${pageResponseDTO.keyword == null}" class="page-link" th:href="@{/article/list(cate=${pageResponseDTO.cate}, pg=${num})}">[[${num}]]</a>
+                        <a th:if="${pageResponseDTO.keyword != null}" class="page-link" th:href="@{/article/list(cate=${pageResponseDTO.cate}, pg=${num}, type=${pageResponseDTO.type}, keyword=${pageResponseDTO.keyword})}">[[${num}]]</a>
+                    </li>
+                    <li th:if="${pageResponseDTO.next}" class="page-item">
+                        <a th:if="${pageResponseDTO.keyword == null}" class="page-link" th:href="@{/article/list(cate=${pageResponseDTO.cate}, pg=${pageResponseDTO.end + 1})}">&raquo;</a>
+                        <a th:if="${pageResponseDTO.keyword != null}" class="page-link" th:href="@{/article/list(cate=${pageResponseDTO.cate}, pg=${pageResponseDTO.end + 1}, type=${pageResponseDTO.type}, keyword=${pageResponseDTO.keyword})}">&#62;</a>
+                    </li>
+
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+
+    <div class="text-end">
+        <a th:href="@{/article/write(cate=${pageResponseDTO.cate})}" class="btn btn-outline-primary">글쓰기</a>
+    </div>
+    <!-- 내용 끝 -->
+</div>
+</html>

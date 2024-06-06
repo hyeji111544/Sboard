@@ -1,0 +1,67 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/userLayout.html}">
+
+<!--
+    - layout:decorate 레이아웃 파일 경로를 지정할 때 타임리프 ~{/경로(반드시 / 시작해야 됨)}를 사용해야 배포환경에서 Error resolving template~ 에러 나지 않음
+    - javascript는 꼭 container 안에서 사용해야 됨
+    - javascript에서 타임리프 문법을 사용하기 위해 th:inline="javascript" 속성 추가
+-->
+<div class="container" layout:fragment="content">
+
+    <script th:inline="javascript">
+
+        window.onload = function (){
+
+            const success = [[${success}]];
+
+            if(success == 100){
+                alertModal('로그인에 실패했습니다.\n다시 한번 아이디, 비밀번호를 확인 하시기 바랍니다. 😢');
+            }else if(success == 200) {
+                alertModal('회원 가입 되었습니다. 😊');
+            }else if(success == 300){
+                alertModal('로그아웃 되었습니다. 안녕히 가세요. 😃');
+            }else if (success==400){
+                alertModal('탈퇴 되었습니다. 다음에 또만나요. 😊');
+            }
+
+        }
+    </script>
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="card shadow-lg border-0 rounded-lg mt-5">
+                <div class="card-header"><h3 class="text-center font-weight-light my-4">Login</h3></div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="form-floating mb-3">
+                            <input class="form-control" type="text" id="inputUid" name="uid" placeholder="" />
+                            <label for="inputUid">아이디 입력</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input class="form-control" type="password" id="inputPassword" name="pass" placeholder="Password" />
+                            <label for="inputPassword">비밀번호 입력</label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" id="inputRememberPassword" type="checkbox" value="" />
+                            <label class="form-check-label" for="inputRememberPassword">비밀번호 기억하기</label>
+                        </div>
+                        <div class="d-grid gap-2 mt-4 mb-0">
+                            <button class="btn btn-outline-warning" type="submit">로그인</button>
+                            <a th:href="@{/oauth2/authorization/google}">
+                                <img th:src="@{/assets/img/web_light_sq_SI.svg}" alt="로그인"/>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-center py-3">
+                    <div class="small">
+                        <a th:href="@{/user/findId}" class="text-secondary">아이디 찾기</a>
+                        <a th:href="@{/user/findPassword}" class="text-secondary">비밀번호 찾기</a>
+                        <a th:href="@{/user/terms}" class="text-secondary">회원가입</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div><!-- container end -->
+</html>

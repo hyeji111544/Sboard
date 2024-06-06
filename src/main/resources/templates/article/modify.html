@@ -1,0 +1,105 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/defaultLayout.html}">
+
+<div class="container-fluid px-4" layout:fragment="content">
+
+    <script th:inline="javascript">
+        window.onload = function (){
+            const btnCancel = document.getElementById('btnCancel');
+            const btnModify = document.getElementById('btnModify');
+            const btnFileDel = document.querySelectorAll('#btnFileDel');
+            const fnoList = [];
+            const no = [modifyForm.no.value];
+
+            btnCancel.onclick = function (e) {
+                e.preventDefault();
+                confirmModal("게시글 수정을 취소하시겠습니까?").then((result)=>{
+                    if (result){
+                        window.history.back(); // 이전 페이지로 이동
+                    }
+                });
+
+            }
+
+            btnFileDel.forEach(function(btnFileDel) {
+                btnFileDel.addEventListener('click', function (e){
+                    const listItem = e.target.closest('#fileList');
+                    listItem.classList.add('d-none');
+                    const fno = btnFileDel.dataset.fno;
+                    fnoList.push(fno)
+                    console.log(fno);
+
+                });
+            });
+
+
+            /** id="btnModify **/
+            /** 수정완료 버튼을 눌러야 수정 내용이 반영됨 **/
+            btnModify.onclick =  function (){
+                if (fnoList.length>0){
+                    const jsonDate = {
+                        fno : fnoList
+                    };
+                    const data = fetchPost(`/sboard/file/modifyFile`, jsonDate);
+                }
+                console.log(no);
+
+                document.modifyFrom.submit();
+            }
+        }
+
+
+    </script>
+
+    <h3 class="mt-4 mb-4">게시판 글 수정</h3>
+
+    <!-- 내용 시작 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            <span th:if="${articleDTO.cate == 'notice'}">공지사항 글수정</span>
+            <span th:if="${articleDTO.cate == 'free'}">자유게시판 글수정</span>
+            <span th:if="${articleDTO.cate == 'faq'}">자주묻는질문 글수정</span>
+            <span th:if="${articleDTO.cate == 'qna'}">묻고답하기 글수정</span>
+        </div>
+        <div class="card-body">
+
+            <form id="modifyForm" name="modifyFrom" th:action="@{/article/modify}" method="post" enctype="multipart/form-data">
+                <input type="text" name="writer" th:value="${#authentication.principal.user.uid}">
+                <input type="text" name="cate" th:value="${articleDTO.getCate()}">
+                <input type="text" name="no" th:value="${articleDTO.getNo()}">
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label" >글제목</label>
+                    <input type="text" class="form-control" id="exampleFormControlInput1" name="title" th:value="${articleDTO.title}">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">글내용</label>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="10" name="content" >[[${articleDTO.content}]]</textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label" >첨부파일</label>
+                    <label for="formFileMultiple" class="form-label">파일첨부</label>
+                    <input class="form-control" type="file" name="files" id="formFileMultiple" multiple>
+                    <ul class="list-group">
+
+                        <li th:each="file:${articleDTO.fileList}" class="list-group-item d-flex justify-content-between align-items-center" id="fileList">
+                            <!-- REST API 개발자도구 열어서 해당 링크 주소 확인해 볼것-->
+                            <a th:href="@{/file/fileDownload/{fno}(fno=${file.fno})}" class="fileLink" th:data-fno="${file.fno}">[[${file.oName}]]</a>
+                            <button type="button" class="btn btn-outline-primary btn-sm" th:data-fno="${file.fno}" id="btnFileDel">삭제</button>
+                            <p>[[${file.fno}]]</p>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="text-end">
+        <a th:href="@{/article/list}" class="btn btn-outline-secondary" id="btnCancel">취소</a>
+        <a th:href="@{#}" class="btn btn-outline-primary" id="btnModify">수정완료</a>
+    </div>
+
+    <!-- 내용 끝 -->
+</div>
+</html>

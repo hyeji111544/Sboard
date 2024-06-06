@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>게시판 메인</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link th:href="@{/css/styles.css}" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <script th:src="@{/js/util.js}"></script>
+</head>
+
+<body class="sb-nav-fixed">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <!-- Navbar Brand-->
+    <a class="navbar-brand ps-3" th:href="@{/index}">Spring 게시판</a>
+    <!-- Sidebar Toggle-->
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+
+
+    <!-- Navbar-->
+    <ul class="navbar-nav  ms-auto me-0 me-md-3 my-2 my-md-0">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" th:href="@{/my/setting(uid=${#authentication.principal.user.uid})}">Settings</a></li>
+                <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" th:href="@{/user/logout}">Logout</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<div id="layoutSidenav">
+    <div id="layoutSidenav_nav">
+        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <div class="sb-sidenav-menu">
+                <div class="nav">
+                    <div class="sb-sidenav-menu-heading">게시판</div>
+                    <a class="nav-link" th:href="@{/article/list(cate=notice)}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-solid fa-hashtag"></i></div>
+                        <span>공지사항</span>
+                    </a>
+
+                    <a class="nav-link" th:href="@{/article/list(cate=free)}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-solid fa-hashtag"></i></div>
+                        <span>자유게시판</span>
+                    </a>
+
+                    <a class="nav-link" th:href="@{/article/list(cate=faq)}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-solid fa-hashtag"></i></div>
+                        <span>자주묻는질문</span>
+                    </a>
+
+                    <a class="nav-link" th:href="@{/article/list(cate=qna)}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-solid fa-hashtag"></i></div>
+                        <span>묻고답하기</span>
+                    </a>
+
+
+                    <div class="sb-sidenav-menu-heading">설정</div>
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+                        <div class="sb-nav-link-icon"><i class="fa-solid fa-gear"></i></div>
+                        게시판 설정
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="layout-static.html"><i class="fa-solid fa-pen"></i>게시판 추가</a>
+                            <a class="nav-link" href="layout-sidenav-light.html"><i class="fa-solid fa-eraser"></i>게시판 삭제</a>
+                        </nav>
+                    </div>
+                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
+                        <div class="sb-nav-link-icon"><i class="fa-solid fa-gear"></i></div>
+                        사용자 설정
+                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                    </a>
+                    <div class="collapse" id="collapsePages" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                        <nav class="sb-sidenav-menu-nested nav">
+                            <a class="nav-link" href="layout-static.html"><i class="fa-solid fa-users"></i>사용자 목록</a>
+                            <a class="nav-link" href="layout-sidenav-light.html"><i class="fa-solid fa-user-gear"></i>사용자 권한 수정</a>
+                        </nav>
+                    </div>
+
+
+                </div>
+            </div>
+            <div class="sb-sidenav-footer">
+                <div class="small">Logged in as:</div>
+                <span>[[${userEmail}]]</span>
+            </div>
+        </nav>
+    </div>
+    <div id="layoutSidenav_content">
+        <main layout:fragment="content">
+            <!-- 내용 시작 -->
+
+            <!-- 내용 끝 -->
+        </main>
+        <footer class="py-4 bg-light mt-auto">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright &copy; 윤혜지 2024</div>
+                    <div>
+                        <a href="#">[[${appInfo.name}]]- [[${appInfo.version}]]</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- 확인, 취소 버튼이 있는 Modal -->
+<div class="modal" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">내용</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary btnCancel" id="btnCancel" data-bs-dismiss="modal" >취소</button>
+                <button type="button" class="btn btn-outline-primary btnOk" id="btnOk">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 확인 버튼이 있는 Modal -->
+<div class="modal fade" id="alertModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" >
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">내용</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 수정 Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- 헤더에는 해당 항목의 이름을 표시 -->
+                <h5 class="modal-title" id="editModalLabel">항목 이름</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- 해당 항목을 수정할 수 있는 입력란 추가 -->
+                <div class="modal-body-comment"></div>
+                <div>
+                    <input type="text" class="form-control mb-3" id="editInput">
+                </div>
+
+                <div id="resultComment" class="d-block"></div>
+            </div>
+            <div class="modal-footer">
+                <!-- 취소 버튼 -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <!-- 저장 버튼 -->
+                <button type="button" class="btn btn-primary"  id="saveButton">저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 메일수정 Modal -->
+<div class="modal fade" id="editMailModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- 헤더에는 해당 항목의 이름을 표시 -->
+                <h5 class="modal-title" id="editMailModalLabel">항목 이름</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- 해당 항목을 수정할 수 있는 입력란 추가 -->
+                <div class="modal-body-comment"></div>
+                <div class="row">
+                    <div class="col">
+                        <input type="text" class="form-control mb-3" id="editMailInput">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <button type="button" class="btn btn-primary" id="btnSendEmailCode">
+                            <span class="spinner spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+                            <span class="" role="status">인증코드 전송</span>
+                        </button>
+                    </div>
+                    <div class="col">
+                        <div id="resultMail" class="d-block"></div>
+                    </div>
+                </div>
+
+                <div class="mt-3"> 인증코드 입력 </div>
+                <div class="row">
+                    <div class="col">
+                        <input type="text" class="form-control mb-3" id="editMailCodeInput">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <button type="button" class="btn btn-primary" id="btnCheckCode">인증확인</button>
+                    </div>
+                    <div class="col">
+                        <div id="resultMailCode" class="d-block"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!-- 취소 버튼 -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <!-- 저장 버튼 -->
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="saveMailButton">저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 주소수정 Modal -->
+<div class="modal fade" id="editAddrModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- 헤더에는 해당 항목의 이름을 표시 -->
+                <h5 class="modal-title" id="editAddrModalLabel">주소 수정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- 해당 항목을 수정할 수 있는 입력란 추가 -->
+                <div class="modal-body-comment"></div>
+                <div class="form-floating mb-3">
+                    <input class="form-control inputZip" id="inputZip" name="zip" type="text" readonly placeholder="우편번호 검색"/>
+                    <label for="inputZip">우편번호 검색</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control inputAddr1" id="inputAddr1" type="text" name="add1" readonly placeholder="기본주소 입력" />
+                    <label for="inputAddr1">기본주소</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input class="form-control inputAddr2" id="inputAddr2" type="text" name="addr2" placeholder="상세주소 입력"/>
+                    <label for="inputAddr2">상세주소 입력</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!-- 취소 버튼 -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <!-- 저장 버튼 -->
+                <button type="button" class="btn btn-primary"  id="saveAddrBtn">저장</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script th:src="@{/js/scripts.js}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+<script th:src="@{/assets/demo/chart-area-demo.js}"></script>
+<script th:src="@{/assets/demo/chart-bar-demo.js}"></script>
+<script th:src="@{/js/datatables-simple-demo.js}"></script>
+</body>
+</html>

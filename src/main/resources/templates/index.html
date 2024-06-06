@@ -1,0 +1,50 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/defaultLayout.html}">
+
+<div class="container-fluid px-4" layout:fragment="content">
+    <h1 class="mt-4">메인</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+
+    <!-- 내용 시작 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            게시판
+        </div>
+        <div class="card-body">
+            <table id="datatablesSimple">
+
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <a class="nav-link list-group-item-action" th:href="@{/article/list(cate=notice)}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-solid fa-hashtag"></i></div>
+                            <span>공지사항</span></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a class="nav-link list-group-item-action" th:href="@{/article/list(cate=free)}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-solid fa-hashtag"></i></div>
+                            <span>자유게시판</span></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a class="nav-link list-group-item-action" th:href="@{/article/list(cate=faq)}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-solid fa-hashtag"></i></div>
+                            <span>자주묻는 질문</span></a>
+                    </li>
+                    <li class="list-group-item">
+                        <a class="nav-link list-group-item-action" th:href="@{/article/list(cate=qna)}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-solid fa-hashtag"></i></div>
+                            <span>묻고 답하기</span></a>
+                    </li>
+                </ul>
+
+
+            </table>
+        </div>
+    </div>
+    <!-- 내용 끝 -->
+</div>
+
+</html>

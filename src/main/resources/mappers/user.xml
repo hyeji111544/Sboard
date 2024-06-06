@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.sboard.mapper.UserMapper">
+
+    <insert id="insertUser">
+        INSERT INTO user set
+                            uid=#{uid},
+                            pass=#{pass},
+                            name=#{name},
+                            nick=#{nick},
+                            hp=#{hp},
+                            email=#{email},
+                            zip=#{zip},
+                            addr1=#{addr1},
+                            addr2=#{addr2},
+                            regip=#{regip},
+                            sms=#{sms},
+                            regDate=NOW()
+    </insert>
+
+    <update id="deleteUser">
+        UPDATE `user` SET
+                pass = NULL,
+                name = NULL,
+                email = NULL,
+                hp = NULL,
+                role = NULL,
+                zip = NULL,
+                addr1 = NULL,
+                addr2 = NULL,
+                regip = NULL,
+                sms = NULL,
+                regDate = NULL,
+                leaveDate=NOW()
+        WHERE uid = #{uid}
+    </update>
+
+    <select id="selectTerms" resultType="kr.co.sboard.dto.TermsDTO">
+        select * from `terms`;
+    </select>
+    <select id="selectCountUser" resultType="int">
+        select count(*) from `user`
+        <where>
+            <if test="type == 'uid'">
+                uid=#{value}
+            </if>
+            <if test="type == 'nick'">
+                nick=#{value}
+            </if>
+            <if test="type == 'hp'">
+                hp=#{value}
+            </if>
+            <if test="type == 'email'">
+                email=#{value}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateUserBy" >
+        update `user`
+        <trim prefix="set" suffixOverrides=",">
+            <if test="type == 'name'">
+                name=#{value},
+            </if>
+            <if test="type == 'nick'">
+                nick=#{value},
+            </if>
+            <if test="type == 'hp'">
+                hp=#{value},
+            </if>
+            <if test="type == 'email'">
+                email=#{value},
+            </if>
+        </trim>
+        where uid = #{uid}
+    </update>
+
+    <update id="updateUserZip">
+        update `user` set
+                        zip=#{zip},
+                        addr1=#{addr1},
+                        addr2=#{addr2}
+                        where uid = #{uid}
+    </update>
+
+
+
+</mapper>

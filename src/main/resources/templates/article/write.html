@@ -1,0 +1,59 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/defaultLayout.html}">
+
+<div class="container-fluid px-4" layout:fragment="content">
+
+    <script>
+        window.onload = function (){
+            const btnSubmit = document.getElementById('btnSubmit');
+
+            btnSubmit.onclick =function (e){
+                e.preventDefault();
+                document.forWrite.submit();
+            }
+        }
+    </script>
+
+    <h3 class="mt-4 mb-4">게시판 글쓰기</h3>
+
+    <!-- 내용 시작 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+                <span th:if="${cate == 'notice'}">공지사항 글쓰기</span>
+                <span th:if="${cate == 'free'}">자유게시판 글쓰기</span>
+                <span th:if="${cate == 'faq'}">자주묻는질문 글쓰기</span>
+                <span th:if="${cate == 'qna'}">묻고답하기 글쓰기</span>
+        </div>
+        <div class="card-body">
+
+            <form name="forWrite" th:action="@{/article/write}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="writer" th:value="${#authentication.principal.user.uid}">
+                <input type="hidden" name="cate" th:value="${cate}">
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label" >글제목</label>
+                    <input type="text" class="form-control" id="exampleFormControlInput1" name="title" placeholder="글 제목 입력">
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlTextarea1" class="form-label">글내용</label>
+                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="10" name="content" placeholder="글 내용 입력"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="formFileMultiple" class="form-label">파일첨부</label>
+                    <input class="form-control" type="file" name="files" id="formFileMultiple" multiple>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="text-end">
+        <a th:href="@{/article/list(cate=${pageResponseDTO.cate},
+                                        type=${pageResponseDTO.type},
+                                        keyword=${pageResponseDTO.keyword})}" class="btn btn-secondary">취소</a>
+        <a th:href="@{#}" class="btn btn-outline-primary" id="btnSubmit">글등록</a>
+    </div>
+
+    <!-- 내용 끝 -->
+</div>
+</html>

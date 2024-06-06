@@ -1,0 +1,388 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/defaultLayout}">
+<!--
+    날짜 : 2024/03/25
+    이름 : 윤혜지
+    내용 : 나의 설정 구현하기
+
+    - http://localhost:8080/sboard/my/setting
+    - 회원정보 수정 및 탈퇴 기능
+    - 회원탈퇴는 해당 사용자의 아이디만 남기고 모두 컬럼의 값을 null 업데이트
+-->
+
+<div class="container-fluid px-4" layout:fragment="content">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+
+        const rePass  = /^(?=.*[a-zA-z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{5,16}$/;
+        const reName  = /^[가-힣]{2,10}$/
+        const reNick  = /^[a-zA-Zㄱ-힣0-9][a-zA-Zㄱ-힣0-9]*$/;
+        const reEmail = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+        const reHp    = /^01(?:0|1|[6-9])-(?:\d{4})-\d{4}$/;
+        window.onload = function (){
+
+            const setName = document.getElementById('settingName');
+            const setNick = document.getElementById('settingNick');
+            const setRegDate = document.getElementById('settingRegDate');
+            const setEmail = document.getElementById('settingEmail');
+            const setHp = document.getElementById('settingHp');
+            const setZip = document.getElementById('settingZip');
+            const btnRemoveUser = document.getElementById('btnRemoveUser');
+            const saveButton = document.getElementById('saveButton');
+            const resultComment = document.getElementById('resultComment');
+            const resultMail = document.getElementById('resultMail');
+            const urlParams = new URLSearchParams(window.location.search);
+            const uid = urlParams.get('uid');
+            console.log(uid);
+
+
+
+
+            setName.onclick = function (){
+                editModal('이름');
+                document.getElementById('editInput').value = '';
+                hideResultInvalid();
+
+                saveButton.onclick = function () {
+                    const value = document.getElementById('editInput').value;
+                    const type = 'name';
+                    console.log(value);
+
+                    if (reName.test(value)) {
+                        const jsonData = {
+                            "uid"   : uid,
+                            "value" : value
+                        };
+                        console.log("jsonData...! " + JSON.stringify(jsonData));
+
+                        // const data = fetchPut(`/my/setting/${type}/${value}/${uid}`, jsonData);
+                        const data = fetchGet(`/sboard/my/setting/${type}/${value}/${uid}`);
+                        console.log(data);
+                        document.getElementById('userName').innerText = value;
+
+                        closeEditModal();
+
+                    } else {
+                        // 입력값이 정규식에 맞지 않을 경우 사용자에게 알립니다.
+                        showResultInvalid(resultComment, '바른 형식으로 입력해주세요');
+                        document.getElementById('editInput').addEventListener('click', function() {
+                            // 결과 메시지가 표시되어 있다면 숨깁니다.
+                            hideResultInvalid();
+                        });
+                    }
+                }
+            }
+
+            <!--닉네임 변경-->
+            setNick.onclick = function (){
+                editModal('별명');
+                document.getElementById('editInput').value = '';
+                hideResultInvalid();
+
+                saveButton.onclick = async function () {
+                    const value = document.getElementById('editInput').value;
+                    const type = 'nick';
+                    console.log(value);
+
+                    if (reNick.test(value)) {
+                        // 이름이 유효한 경우 중복 체크를 실행합니다.
+
+                        const jsonData = {
+                            "uid"   : uid,
+                            "value" : value
+                        };
+                        console.log("jsonData...! " + JSON.stringify(jsonData));
+
+                        // 중복 확인을 위해 서버에 요청을 보냅니다.
+                        const data = await fetchGet(`/sboard/user/${type}/${value}`);
+
+                        if (data.result > 0) {
+                            // 중복이 있는 경우 사용자에게 알립니다.
+                            showResultInvalid(resultComment, '이미 사용중인 닉네임입니다.');
+                        } else {
+                            // 중복이 없는 경우 서버로 데이터를 업데이트하는 요청을 보냅니다.
+                            const updateResponse = await fetch(`/sboard/my/setting/${type}/${value}/${uid}`);
+                            const updateData = await updateResponse.json();
+                            console.log(updateData);
+                            document.getElementById('userNick').innerText = value; // 업데이트된 이름을 화면에 표시합니다.
+
+
+
+                            closeEditModal();
+                        }
+
+                    } else {
+                        // 입력값이 유효하지 않은 경우 사용자에게 알립니다.
+                        showResultInvalid(resultComment, '바른 형식으로 입력해주세요');
+                        document.getElementById('editInput').addEventListener('click', function() {
+                            // 결과 메시지가 표시되어 있다면 숨깁니다.
+                            hideResultInvalid();
+                        });
+                    }
+                }
+            }
+            //setRegDate.onclick = function (){alertModal('가입일은 수정할 수 없습니다.');}
+
+            <!--이메일 변경-->
+            const btnSendEmailCode = document.getElementById('btnSendEmailCode');
+            const saveMailButton = document.getElementById('saveMailButton');
+            const resultMailCode = document.getElementById('resultMailCode');
+
+            setEmail.onclick = function (){
+                editMailModal('메일');
+                document.getElementById('editInput').value = '';
+                const type = 'email';
+                hideResultInvalid();
+
+                btnSendEmailCode.onclick = async function () {
+                    const spinner   = this.getElementsByClassName('spinner')[0];
+                    const value = document.getElementById('editMailInput').value;
+                    console.log("here...1" + value);
+
+                    if (reEmail.test(value)) {
+                        const jsonData = {
+                            "uid": uid,
+                            "value": value
+                        };
+                        console.log("jsonData...! " + JSON.stringify(jsonData));
+                        hideResultInvalid();
+                        spinner.classList.remove('d-none');
+
+                        //  서버에 요청을 보냅니다.
+                        const data = await fetchGet(`/sboard/user/${type}/${value}`);
+
+                        if (data.result > 0) {
+                            // 중복이 있는 경우 사용자에게 알립니다.
+                            showResultInvalid(resultMail, '이미 사용중인 이메일입니다.');
+                            spinner.classList.add('d-none');
+                        } else {
+                            // 중복이 없는 경우 코드인증 메일요청을 보냅니다.
+                            console.log('data : ' + data.result);
+                            hideResultInvalid();
+                            showResultValid(resultMail, '인증코드가 발송 되었습니다.');
+                            spinner.classList.add('d-none');
+                        }
+                    }else {
+                        console.error('중복 확인 요청 중 오류 발생:');
+                    }
+
+                }
+
+
+                const editMailCodeInput = document.getElementById('editMailCodeInput');
+                const btnCheckCode = document.getElementById('btnCheckCode');
+
+                btnCheckCode.onclick = async function(){
+                    const value = editMailCodeInput.value;
+                    console.log("checkEmailCodes...:"+value);
+
+                    const data = await fetchGet(`/sboard/email/${value}`);
+
+                    if (!data.result){
+                        hideResultInvalid();
+                        showResultInvalid(resultMailCode, '인증코드가 일치하지 않습니다.');
+
+                    }else {
+                        hideResultInvalid();
+                        showResultValid(resultMailCode, '메일이 인증되었습니다.');
+                    }
+                }
+
+                saveMailButton.onclick = async function () {
+                    const value = document.getElementById('editMailInput').value;
+                    const updateResponse = await fetch(`/sboard/my/setting/${type}/${value}/${uid}`);
+                    const updateData = await updateResponse.json();
+                    console.log(updateData);
+                    document.getElementById('userEmail').innerText = value; // 업데이트된 이름을 화면에 표시합니다.
+                    closeEditMailModal();
+                }
+
+            }
+
+            setHp.onclick = function (){
+                editModal('번호');
+                document.getElementById('editInput').value = '';
+                hideResultInvalid();
+
+                saveButton.onclick = async function () {
+                    const value = document.getElementById('editInput').value;
+                    const type = 'hp';
+                    console.log(value);
+                    const reHp    = /^01(?:0|1|[6-9])-(?:\d{4})-\d{4}$/;
+
+
+                    if (reHp.test(value)) {
+                        // 이름이 유효한 경우 중복 체크를 실행합니다.
+
+                        const jsonData = {
+                            "uid"   : uid,
+                            "value" : value
+                        };
+                        console.log("jsonData...! " + JSON.stringify(jsonData));
+
+                        // 중복 확인을 위해 서버에 요청을 보냅니다.
+                        const data = await fetchGet(`/sboard/user/${type}/${value}`);
+
+                        if (data.result > 0) {
+                            // 중복이 있는 경우 사용자에게 알립니다.
+                            showResultInvalid(resultComment, '이미 사용중인 번호입니다.');
+                        } else {
+                            // 중복이 없는 경우 서버로 데이터를 업데이트하는 요청을 보냅니다.
+                            const updateResponse = await fetch(`/sboard/my/setting/${type}/${value}/${uid}`);
+                            const updateData = await updateResponse.json();
+                            console.log(updateData);
+                            document.getElementById('userHp').innerText = value;
+
+                            closeEditModal();
+                        }
+
+                    } else {
+                        // 입력값이 유효하지 않은 경우 사용자에게 알립니다.
+                        showResultInvalid(resultComment, '바른 형식으로 입력해주세요');
+                        document.getElementById('editInput').addEventListener('click', function() {
+                            // 결과 메시지가 표시되어 있다면 숨깁니다.
+                            hideResultInvalid();
+                        });
+                    }
+                }
+            }
+
+            setZip.onclick = function (){
+                editAddrModal();
+
+                const inputZip = document.getElementById('inputZip');
+                const saveAddrBtn = document.getElementById('saveAddrBtn');
+
+                inputZip.onclick = function (){
+                    postcode();
+                }
+                saveAddrBtn.onclick = async function (){
+                    const zipValue = document.getElementById('inputZip').value;
+                    const addr1Value = document.getElementById('inputAddr1').value;
+                    const addr2Value = document.getElementById('inputAddr2').value;
+                    const jsonData = {
+                        "uid"   : uid,
+                        "zip" : zipValue,
+                        "addr1" : addr1Value,
+                        "addr2" : addr2Value
+                    };
+                    console.log(jsonData.addr1);
+
+                    try {
+                        const data = await fetchPut(`/sboard/updateZip`, jsonData);
+                        console.log("1!!!"+data);
+                        document.getElementById('userZip').innerText = zipValue;
+                        document.getElementById('userAddr1').innerText = addr1Value;
+                        document.getElementById('userAddr2').innerText = addr2Value;
+                        closeEditZipModal();
+                    }catch (error) {
+                        console.error('주소 변경 요청 실패', error);
+                    }
+                }
+            }
+
+            btnRemoveUser.onclick = function (){
+                confirmModal('회원 탈퇴를 클릭하면 모든 계정 정보가 삭제됩니다.\n정말 탈퇴하시겠습니까?');
+                const btnOk = document.getElementById('btnOk');
+
+                btnOk.onclick = async function (){
+                    try{
+                        const data = await fetchDelete(`/sboard/user/${uid}`);
+                        console.log(data);
+                        closeconfirmModal();
+                        window.location.href = '/sboard/user/login?success=400';
+
+                    }catch (error){
+                        console.error('탈퇴실패', error);
+                    }
+                }
+            }
+
+
+
+        }
+
+    </script>
+
+    <h3 class="mt-4 mb-4">나의 설정</h3>
+
+    <!-- 내용 시작 -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            기본정보
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <tr>
+                    <td class="col-md-2">아이디</td>
+                    <td class="col-md-10" id="userId">[[${userDTO.getUid()}]]</td>
+                </tr>
+                <tr id="settingName">
+                    <td class="col-md-2">이름</td>
+                    <td class="col-md-10" id="userName">[[${userDTO.getName()}]]</td>
+                </tr>
+                <tr id="settingNick">
+                    <td class="col-md-2">별명</td>
+                    <td class="col-md-10" id="userNick">[[${userDTO.getNick()}]]</td>
+                </tr>
+                <tr id="settingRegDate">
+                    <td class="col-md-2">회원가입일</td>
+                    <td class="col-md-10" id="regDate">[[${#temporals.format(userDTO.getRegDate(), 'yyyy-MM-dd HH:mm:ss')}]]</td>
+                </tr>
+            </table>
+            <div class="text-end">
+                <a th:href="@{#}" class="btn btn-outline-secondary" id="passwordChangeBtn" onclick="openEditModal('password')">비밀번호 변경</a>
+            </div>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            연락처 정보
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <tr id="settingEmail">
+                    <td class="col-md-2">이메일</td>
+                    <td class="col-md-10" id="userEmail">[[${userDTO.getEmail()}]]</td>
+                </tr>
+                <tr id="settingHp">
+                    <td>휴대폰</td>
+                    <td class="col-md-10" id="userHp">[[${userDTO.getHp()}]]</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table me-1"></i>
+            주소
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <tr>
+                    <td>주소</td>
+                    <td id="settingZip">
+                        <div id="userZip">[[${userDTO.getZip()}]]</div>
+                        <div id="userAddr1">[[${userDTO.getAddr1()}]]</div>
+                        <div id="userAddr2">[[${userDTO.getAddr2()}]]</div>
+                    </td>
+                </tr>
+
+            </table>
+
+        </div>
+
+    </div>
+    <div class="d-flex justify-content-end mb-4">
+        <a th:href="@{#}" class="btn btn-outline-secondary" id="btnRemoveUser">회원탈퇴</a>
+    </div>
+
+    <!-- 내용 끝 -->
+
+
+
+</div>
+</html>

@@ -1,0 +1,77 @@
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/layout/userLayout.html}">
+
+
+    <div class="container" layout:fragment="content">
+        <script>
+            window.onload = function (){
+
+                const agree1 = document.getElementsByName('agree1')[0];
+                const agree2 = document.getElementsByName('agree2')[0];
+                const agree3 = document.getElementsByName('agree3')[0];
+                const btnNext = document.getElementsByClassName('btnNext')[0];
+                const registerLink = document.getElementById('registerLink');
+
+                btnNext.onclick = () => {
+
+                    if(agree1.checked && agree2.checked){
+
+                        if (agree3.checked) {
+                            registerLink.href = '/sboard/user/register?sms=Y';
+                        } else {
+                            registerLink.href = '/sboard/user/register?sms=N';
+                        }
+                        console.log(registerLink.href);
+                        return true;
+                    } else {
+                        alertModal('이용약관과 개인정보 취급방침은 필수 동의입니다.');
+                        return false;
+                    }
+                }
+            }
+        </script>
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="card shadow-lg border-0 rounded-lg mt-5 mb-5">
+                    <div class="card-header"><h3 class="text-center font-weight-light my-4">사이트 이용약관</h3></div>
+                    <div class="card-body">
+                        <form>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label for="terms">사이트 이용약관</label>
+                                    <textarea class="form-control" id="terms" rows="10" cols="100">[[${terms.terms}]]</textarea>
+                                    <label class="float-end"><input type="checkbox" name="agree1">동의합니다.</label>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label for="terms">개인정보 취급방침</label>
+                                    <textarea class="form-control" rows="10" cols="100" >[[${terms.privacy}]]</textarea>
+                                    <label class="float-end"><input type="checkbox" name="agree2">동의합니다.</label>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label for="terms">마케팅 수신동의</label>
+                                    <textarea class="form-control" rows="10" cols="100">[[${terms.sms}]]</textarea>
+                                    <label class="float-end"><input type="checkbox" name="agree3">동의합니다.</label>
+                                </div>
+                            </div>
+                            <div class="text-center mt-4 mb-0">
+                                <a class="btn btn-secondary btnCancle" th:href="@{/user/login}">취소</a>
+                                <a id="registerLink" class="btn btn-primary btnNext"  th:href="@{/user/register}" >다음</a>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</html>
