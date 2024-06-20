@@ -36,6 +36,7 @@
 
 ### API 활용
 <img src="https://github.com/hyeji111544/Sboard/assets/154953972/6e4087cc-edfc-471a-adfc-2639675f6e0d" width="400"/>
+
 - 주소 검색을 위해 kakao에서 제공하는 API 를 활용하기 위해 API 에 대해 공부하여 기능 구현을 할 수 있었습니다.
   
 ### PageResponseDTO 생성
